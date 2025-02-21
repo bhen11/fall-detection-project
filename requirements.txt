@@ -2,3 +2,5 @@ tensorflow
 numpy
 opencv-python
 matplotlib
+scipy
+python-dotenv
