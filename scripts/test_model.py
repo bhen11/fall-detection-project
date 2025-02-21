@@ -1,6 +1,9 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 # Load the trained model
 model = tf.keras.models.load_model("models/fall_detection_model.h5")
@@ -16,6 +19,9 @@ def predict_fall(img_path):
     return "Fall Detected" if prediction > 0.5 else "No Fall Detected"
 
 # Test with an image (replace with your test image path)
-img_path = "C:/Users/Bhenedix Paul/PycharmProjects/fALL-DETECTION-PROJECT/dataset/images/val/Fall/fall001.jpg"
+img_path = os.getenv("dataset_path")+"/images/val/No_Fall/not fallen008.jpg"
+
 # Replace with an actual test image path
-print(predict_fall(img_path))
+print("No Fall prediction: "+predict_fall(img_path))
+img_path = os.getenv("dataset_path")+"/images/val/Fall/fall004.jpg"
+print("Fall prediction: "+predict_fall(img_path))

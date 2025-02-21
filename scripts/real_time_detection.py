@@ -2,9 +2,12 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import img_to_array
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 # Load the trained model
-model = tf.keras.models.load_model("C:/Users/Bhenedix Paul/PycharmProjects/fALL-DETECTION-PROJECT/models/fall_detection_model.h5")
+model = tf.keras.models.load_model(os.getenv("model_path")+"/fall_detection_model.h5")
 
 
 # Start webcam
