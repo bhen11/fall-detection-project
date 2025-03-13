@@ -15,26 +15,22 @@ data_dir = os.getenv("dataset_path")+"/images"
 datagen = ImageDataGenerator(
     rescale=1./255,
     validation_split=0.2,
-    rotation_range=30,
+    rotation_range=15,
     width_shift_range=0.3,
     height_shift_range=0.3,
     shear_range=0.3,
-    zoom_range=0.3,
+    zoom_range=0.2,
     horizontal_flip=True,
-    brightness_range=[0.8, 1.2]
+    brightness_range=[0.8, 1.4]
 )
 
 train_data = datagen.flow_from_directory(
-    data_dir + "/train", target_size=(64, 64), batch_size=32, class_mode='binary', subset='training')
+    data_dir + "/train", target_size=(256, 256), batch_size=16, class_mode='binary', subset='training')
 val_data = datagen.flow_from_directory(
-    data_dir + "/val", target_size=(64, 64), batch_size=32, class_mode='binary', subset='validation')
+    data_dir + "/val", target_size=(256, 256), batch_size=16, class_mode='binary', subset='validation')
 
 model = Sequential([
-    Conv2D(32, (3,3), activation='relu', input_shape=(64, 64, 3)),
-    BatchNormalization(),
-    MaxPooling2D(2,2),
-    Dropout(0.25),
-    Conv2D(64, (3,3), activation='relu'),
+    Conv2D(64, (3,3), activation='relu', input_shape=(256, 256, 3)),
     BatchNormalization(),
     MaxPooling2D(2,2),
     Dropout(0.25),
@@ -42,8 +38,13 @@ model = Sequential([
     BatchNormalization(),
     MaxPooling2D(2,2),
     Dropout(0.25),
+    Conv2D(256, (3,3), activation='relu'),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    Dropout(0.25),
     Flatten(),
-    Dense(128, activation='relu', kernel_regularizer='l2'),
+    Dense(256, activation='relu', kernel_regularizer='l2'),
+    Dense(128, activation='relu'),
     Dropout(0.5),
     Dense(1, activation='sigmoid')
 ])
@@ -78,7 +79,7 @@ print(f"Class Weights: {class_weights}")
 
 model.compile(optimizer=Adam(learning_rate=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
 # Train the model with the new architecture and learning rate scheduler
-model.fit(train_data, validation_data=val_data, epochs=50, callbacks=[early_stopping, lr_scheduler], class_weight=class_weights)
+model.fit(train_data, validation_data=val_data, epochs=30, callbacks=[early_stopping, lr_scheduler], class_weight=class_weights)
 model.save(os.getenv("model_path")+"/fall_detection_model.h5")
 
 print("Model trained and saved successfully!")

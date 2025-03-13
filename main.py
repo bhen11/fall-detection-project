@@ -1,16 +1,23 @@
-# This is a sample Python script.
+from flask import Flask, Response
+from scripts.real_time_detection import generate_frames, fall_detection, start_capture
+app = Flask(__name__)
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+@app.route('/style.css')
+def style():
+    return Response(open('style.css').read(), mimetype='text/css')
+    
+@app.route('/')
+def index():
+    return Response(open('index.html').read(), mimetype='text/html')
 
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.route('/fall_status')
+def fall_status():
+    return Response("fall" if fall_detection() else "no fall", mimetype="text/plain")
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    start_capture()
+    app.run(host='0.0.0.0', port=5000)
