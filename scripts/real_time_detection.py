@@ -10,7 +10,6 @@ import os
 from dotenv import load_dotenv
 import base64
 import subprocess
-import asyncio
 
 
 # Load environment variables for paths
@@ -24,7 +23,7 @@ SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')  # Replace with your SMTP password
 RECIPIENT_EMAIL = os.getenv('RECIPIENT_EMAIL')  # Replace with recipient's email address
 
 
-async def send_email_alert(frame):
+def send_email_alert(frame):
     # convert frame to a PNG image
     image_data = cv2.imencode('.png', frame)[1].tobytes()
 
@@ -57,7 +56,7 @@ async def send_email_alert(frame):
             server.connect(SMTP_SERVER, SMTP_PORT)
             server.starttls()  
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            await asyncio.create_task(server.send_message(message))
+            server.send_message(message)
         print("Email alert sent successfully!")
     except Exception as e:
         print(f"Failed to send email alert: {e}")
@@ -103,7 +102,7 @@ def generate_frames():
             fall_status = True
             fall_detected_count += 1
             if fall_detected_count >= 30:  # threshold before sending alert
-                asyncio.create_task(send_email_alert(frame))
+                send_email_alert(frame)
                 fall_detected_count = 0  
         else:
             fall_status = False
