@@ -14,9 +14,10 @@ def index():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 @app.route('/fall_status')
 def fall_status():
-    return Response("fall" if fall_detection() else "no fall", mimetype="text/plain")
+    return Response("Fall Detected!!" if fall_detection() else "No Fall Detected", mimetype="text/plain")
 
 if __name__ == '__main__':
     start_capture()

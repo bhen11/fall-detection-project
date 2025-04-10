@@ -68,7 +68,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 # Define EarlyStopping callback
 early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-# Train the model with EarlyStopping
 import numpy as np
 
 # Calculate class weights

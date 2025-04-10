@@ -10,6 +10,8 @@ import os
 from dotenv import load_dotenv
 import base64
 import subprocess
+import asyncio
+
 
 # Load environment variables for paths
 load_dotenv()
@@ -22,8 +24,7 @@ SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')  # Replace with your SMTP password
 RECIPIENT_EMAIL = os.getenv('RECIPIENT_EMAIL')  # Replace with recipient's email address
 
 
-
-def send_email_alert(frame):
+async def send_email_alert(frame):
     # convert frame to a PNG image
     image_data = cv2.imencode('.png', frame)[1].tobytes()
 
@@ -56,25 +57,30 @@ def send_email_alert(frame):
             server.connect(SMTP_SERVER, SMTP_PORT)
             server.starttls()  
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            server.send_message(message)
+            await asyncio.create_task(server.send_message(message))
         print("Email alert sent successfully!")
     except Exception as e:
         print(f"Failed to send email alert: {e}")
 
 
-model_path = os.getenv("model_path") + "/fall_detection_model_final.h5"
+model_path = os.getenv("model_path") + "/fall_detection_model.h5"
 model = tf.keras.models.load_model(model_path)
 fall_status = False
+
+
 def fall_detection():
     return fall_status
 
+
 cap = None
+
+
 def start_capture():
     global cap
     cap = cv2.VideoCapture(2)
+
+
 def generate_frames():
-
-
     fall_detected_count = 0  
     while True:
         ret, frame = cap.read()
@@ -97,7 +103,7 @@ def generate_frames():
             fall_status = True
             fall_detected_count += 1
             if fall_detected_count >= 30:  # threshold before sending alert
-                send_email_alert(frame)
+                asyncio.create_task(send_email_alert(frame))
                 fall_detected_count = 0  
         else:
             fall_status = False
