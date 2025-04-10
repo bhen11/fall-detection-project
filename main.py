@@ -17,7 +17,8 @@ def video_feed():
 
 @app.route('/fall_status')
 def fall_status():
-    return Response("Fall Detected!!" if fall_detection() else "No Fall Detected", mimetype="text/plain")
+    fall_status, prediction = fall_detection()
+    return Response("Fall Detected!!, Prediction: " + str(prediction) if fall_status else "No Fall Detected, Prediction: " + str(prediction), mimetype="text/plain")
 
 if __name__ == '__main__':
     start_capture()

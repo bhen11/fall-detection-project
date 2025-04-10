@@ -28,8 +28,9 @@
                 fetch("/fall_status")
                     .then(response => response.text())
                     .then(data => {
+                        console.log(data);
                         thing.innerHTML = data;
-                        if(data == "Fall Detected!!"){
+                        if(data.split(",")[0] == "Fall Detected!!"){
                             thing.style.color = "red";
                         } else {
                             thing.style.color = "green";

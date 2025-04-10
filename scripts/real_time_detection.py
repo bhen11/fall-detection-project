@@ -65,10 +65,12 @@ def send_email_alert(frame):
 model_path = os.getenv("model_path") + "/fall_detection_model.h5"
 model = tf.keras.models.load_model(model_path)
 fall_status = False
+g_prediction = 0
 
 
 def fall_detection():
-    return fall_status
+    print(fall_status, g_prediction)
+    return (fall_status, g_prediction)
 
 
 cap = None
@@ -76,10 +78,14 @@ cap = None
 
 def start_capture():
     global cap
-    cap = cv2.VideoCapture(2)
+    if 'ANDROID_DATA' in os.environ:
+        cap = cv2.VideoCapture('rtsp://localhost:8080/h264.sdp')
+    else:
+        cap = cv2.VideoCapture('rtsp://192.168.63.5:8080/h264.sdp')
 
 
 def generate_frames():
+    global fall_status, g_prediction
     fall_detected_count = 0  
     while True:
         ret, frame = cap.read()
@@ -92,16 +98,16 @@ def generate_frames():
         img = np.expand_dims(img, axis=0)  
 
         prediction = model.predict(img)
-        
+        g_prediction = prediction
         print(f"Raw Prediction: {prediction}")
         
         label = "Fall Detected" if prediction > 0.5 else "No Fall"
 
-        # Increment counter if fall is detected
+
         if label == "Fall Detected":
             fall_status = True
             fall_detected_count += 1
-            if fall_detected_count >= 30:  # threshold before sending alert
+            if fall_detected_count >= 30:
                 send_email_alert(frame)
                 fall_detected_count = 0  
         else:
@@ -111,7 +117,7 @@ def generate_frames():
         # display result on video feed
         cv2.putText(frame, label, (10, 50), cv2.FONT_HERSHEY_DUPLEX,
                     fontScale=1, color=(100, 100, 255), thickness=2)
-        cv2.imshow("Fall Detection", frame)
+        #cv2.imshow("Fall Detection", frame)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
         # q to quit feed
